@@ -9,6 +9,8 @@ LAMAC=lamac
 all: Parser.o Lexer.o X86.o SM.o Manifest.o
 	$(LAMAC) -I . -o lama-impl Driver.lama
 
+Lexer.o: Ostap.o
+
 Parser.o: Lexer.o
 
 Builtins.o: World.o

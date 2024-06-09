@@ -54,6 +54,7 @@ fun parseArgs (args) {
                case h of
                  "-i"  -> setMode (Int)
                | "-s"  -> setMode (SM)
+               | "-ast"  -> setMode (AST)
                | "-ds" -> setDump (SM)
                | "-dp" -> setDump (AST)
                | "-dt" -> setDump (TIME)
@@ -118,11 +119,11 @@ fun createLog (args) {
     dumpSM  (args, lazy (showSM (deref $ sm)));
 
     if args [4] () then
-      printTime ("Parsing time          ", deref (parseTime));
-      printTime ("SM compile time       ", deref (smTime));
-      printTime ("X86 compile time      ", deref (x86Time));
-      printTime ("Interpretation time   ", deref (evalTime));
-      printTime ("SM interpretation time", deref (evalSMTime))
+      printTime ("Parsing time          ", deref (parseTime))
+--       printTime ("SM compile time       ", deref (smTime));
+--       printTime ("X86 compile time      ", deref (x86Time));
+--       printTime ("Interpretation time   ", deref (evalTime));
+--       printTime ("SM interpretation time", deref (evalSMTime))
     fi
   }
 
@@ -169,7 +170,8 @@ case parseString (syntax (parse -end), fread (args.getInFile)) of
     log.logAST (program, t ());
     t := timer ();
     case args.getMode of
-      Comp -> var sm = log.logSM (compileSM (program), t ());
+      AST -> skip
+    | Comp -> var sm = log.logSM (compileSM (program), t ());
               t := timer ();
               compileX86 (args, sm);
               log.logX86 (t ())

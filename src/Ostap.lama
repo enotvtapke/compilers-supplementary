@@ -37,7 +37,6 @@ public fun memo (f) {
 
   fun (k) {
     fun (s) {
-    -- TODO Find t outside of fun (k) { fun(s) { only once.
       var t =
         case findHashTab (deref (tab), f) of
           Some (t) -> t
@@ -79,8 +78,6 @@ public fun memo (f) {
 
 public fun token (x) {
 -- printf ("token: %s\n", x.string);
--- TODO Do not apply k on Failed result. It may lead to huge amount of Fail result in result sets of memoized parsers even when grammar is unambiguous.
--- TODO Do not apply memo on tokens. Negatives far outweight benefits.
   case x of
       #str -> memo $ fun (k) {fun (s) {k $ matchString (s, x)}}
     | _    -> memo $ fun (k) {fun (s) {k $ matchRegexp (s, x)}}
@@ -115,13 +112,11 @@ public fun alt (a, b) {
 }
 
 public fun seq (a, b) {
--- TODO Memo seems to be unnecessary but drastically decrease perfomance.
   memo $
     fun (k) {
       fun (s) {
         if log then printf ("Running seq at %s\n", s.string) fi;
         a (fun (ar) {
-        -- TODO Provided the correctictions for token is applied, it is pointless to make branch _ -> k (ar).
           case ar of
               Succ (x, s) -> b (x) (k) (s)
             | _          -> k (ar)
