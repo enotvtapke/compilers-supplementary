@@ -10,7 +10,7 @@ check: $(TESTS)
 
 $(TESTS): %: %.lama
 	@echo $@
-	@ulimit -s -S 32768; $(LAMAC) $@.lama -ast -dp -dt >> 1time.log
+	@ulimit -s -S 32768; $(LAMAC) $@.lama -ast -dp -dt >> $@_time.log && diff $@.ast orig/$@.ast
 
 expr_tests:
 	make -C expressions
