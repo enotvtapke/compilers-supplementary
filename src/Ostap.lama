@@ -30,7 +30,12 @@ public fun memo (f) {
 
   case findHashTab (deref (tab), f) of
       None      -> if log then printf ("new table...\n") fi;
-      tab ::= addHashTab (deref (tab), f, ref (emptyMap (compare)))
+      tab ::= addHashTab (deref (tab), f, ref (emptyMap (fun (r1, r2) {
+        case [r1, r2] of
+          [[_, _, _, _, getLine1, getCol1], [_, _, _, _, getLine2, getCol2]] -> (getLine1(r1) * 10000 + getCol1(r1)) - (getLine2(r2) * 10000 + getCol2(r2))
+          | _    -> compare (r1, r2)
+        esac
+      })))
 
     | Some (tt) -> skip
   esac;
@@ -45,14 +50,16 @@ public fun memo (f) {
       if log then printf ("Applying memoized parser to %s\n", s.string) fi;
       case findMap (deref (t), s) of
           None  ->
+            var tmp;
             if log then printf ("New stream item\n") fi;
             t ::= addMap (deref (t), s, [addSet (emptySet (compare), k), emptySet (fun (r1, r2) {
               case [r1, r2] of
                   [Fail (_, _, _), Fail (_, _, _)] -> 0
-                | _                                -> compare (r1, r2)
+                | [[_, _, _, _, getLine1, getCol1], [_, _, _, _, getLine2, getCol2]]    -> printf ("New stream item\n");(getLine1(r1) * 10000 + getCol1[r1]) - (getLine2(r2) * 10000 + getCol2(r2))
+                | _    -> compare (r1, r2)
               esac
             })]);
-            f (fun (r) {
+            tmp := f (fun (r) {
             --r := lookupMemo (restab, r);
 
               if log then printf ("Running continuation with result %s\n", r.string) fi;
@@ -66,8 +73,8 @@ public fun memo (f) {
                   fi
               esac
             }
-            )
-              (s)
+            );
+            tmp(s)
         | Some ([ks, rs]) ->
             t ::= addMap (deref (t), s, [addSet (ks, k), rs]);
             iterSet (k, rs)
@@ -339,4 +346,5 @@ public fun expr (ops, opnd) {
   inner (ops) (id)
 }
 
+-- logOn ();
 initOstap ()
