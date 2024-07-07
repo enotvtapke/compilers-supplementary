@@ -9,6 +9,7 @@ Optimizations TODO:
     * ~~Replace maps for results~~ (Fail results are ignored. It means that no error will be reported in case of parsing failure)
         * Done: 7.621047 s -> 5.263397 s
 * Remove unnecessary memo invocations
+    * Done: 5.045601 s -> 4.793541 s
 * ~~Optimize matchers comparison in Ostap~~
     * Done: 19.132693 s -> 9.771348 s
 * Optimize closure comparisons?

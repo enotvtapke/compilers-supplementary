@@ -86,8 +86,8 @@ public fun memo (f) {
 public fun token (x) {
 -- printf ("token: %s\n", x.string);
   case x of
-      #str -> memo $ fun (k) {fun (s) {k $ matchString (s, x)}}
-    | _    -> memo $ fun (k) {fun (s) {k $ matchRegexp (s, x)}}
+      #str -> fun (k) {fun (s) {k $ matchString (s, x)}}
+    | _    -> fun (k) {fun (s) {k $ matchRegexp (s, x)}}
   esac
 }
 
@@ -108,29 +108,27 @@ public fun empty (k) {
 }
 
 public fun alt (a, b) {
-  memo $
-    fun (k) {
-      fun (s) {
-        if log then printf ("Running alt at %s\n", s.string) fi;
-        a (k) (s);
-        b (k) (s)
-      }
+  fun (k) {
+    fun (s) {
+      if log then printf ("Running alt at %s\n", s.string) fi;
+      a (k) (s);
+      b (k) (s)
     }
+  }
 }
 
 public fun seq (a, b) {
-  memo $
-    fun (k) {
-      fun (s) {
-        if log then printf ("Running seq at %s\n", s.string) fi;
-        a (fun (ar) {
-          case ar of
-              Succ (x, s) -> b (x) (k) (s)
-            | _          -> k (ar)
-          esac
-        }) (s)
-      }
+  fun (k) {
+    fun (s) {
+      if log then printf ("Running seq at %s\n", s.string) fi;
+      a (fun (ar) {
+        case ar of
+            Succ (x, s) -> b (x) (k) (s)
+          | _          -> k (ar)
+        esac
+      }) (s)
     }
+  }
 }
 
 public infixr |  before !! (a, b) {alt (a, b)}
