@@ -56,7 +56,7 @@ public fun memo (f) {
           None  ->
             var tmp;
             if log then printf ("New stream item\n") fi;
-            t ::= addHashTab (deref (t), s, [addSet (emptySet (compare), k), emptySet (fun (r1, r2) {
+            t ::= addHashTab (deref (t), s, [{k}, emptySet (fun (r1, r2) {
               case [r1, r2] of
                   [Fail (_, _, _), Fail (_, _, _)] -> 0
                 | _                                -> compare (r1, r2)
@@ -72,14 +72,14 @@ public fun memo (f) {
                     then skip
                     else
                       t ::= addHashTab (deref (t), s, [ks, addSet (rs, r)]);
-                      iterSet (fun (k) {k (r)}, ks)
+                      iter (fun (k) {k (r)}, ks)
                   fi
               esac
             }
             );
             tmp(s)
         | Some ([ks, rs]) ->
-            t ::= addHashTab (deref (t), s, [addSet (ks, k), rs]);
+            t ::= addHashTab (deref (t), s, [k:ks, rs]);
             iterSet (k, rs)
       esac
     }
