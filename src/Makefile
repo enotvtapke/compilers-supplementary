@@ -9,6 +9,8 @@ LAMAC=lamac
 all: Parser.o Lexer.o Ostap.o
 	$(LAMAC) -I . -o lama-impl Driver.lama
 
+Ostap.o: Matcher.o
+
 Lexer.o: Ostap.o
 
 Parser.o: Lexer.o

@@ -23,12 +23,6 @@ public fun initOstap () {
   hct    := emptyMemo ()
 }
 
-fun getMatcherId(matcher) {
-  case matcher of
-    [_, _, _, _, getLine, getCol] -> (getLine(matcher) * 10000 + getCol(matcher))
-  esac
-}
-
 public fun memo (f) {
   var t;
 
@@ -36,8 +30,8 @@ public fun memo (f) {
 
   case findHashTab (deref (tab), f) of
       None      -> if log then printf ("new table...\n") fi;
-      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getMatcherId, fun (r1, r2) {
-        compare(getMatcherId(r1), getMatcherId(r2))
+      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getPos, fun (r1, r2) {
+        compare(getPos(r1), getPos(r2))
       })))
 
     | Some (tt) -> skip
