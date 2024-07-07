@@ -66,6 +66,7 @@ public fun memo (f) {
                   case r of
                       Fail (_, _, _) -> skip
                     | _              ->
+                      t ::= removeHashTab(deref(t), s);
                       t ::= addHashTab(deref(t), s, [ks, r:rs]);
                       iter(fun (k) { k(r) }, ks)
                   esac
@@ -74,6 +75,7 @@ public fun memo (f) {
             );
             tmp(s)
         | Some ([ks, rs]) ->
+            t ::= removeHashTab(deref(t), s);
             t ::= addHashTab (deref (t), s, [k:ks, rs]);
             iter (k, rs)
       esac
