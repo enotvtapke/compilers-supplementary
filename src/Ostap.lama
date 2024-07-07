@@ -30,7 +30,7 @@ fun getMatcherId(matcher) {
 }
 
 public fun memo (f) {
--- f := lookupMemo (hct, f);
+  var t;
 
   if log then printf ("Memoizing %x=%s\n", f, f.string) fi;
 
@@ -42,14 +42,13 @@ public fun memo (f) {
 
     | Some (tt) -> skip
   esac;
+  t :=
+    case findHashTab (deref (tab), f) of
+      Some (t) -> t
+    esac;
 
   fun (k) {
     fun (s) {
-      var t =
-        case findHashTab (deref (tab), f) of
-          Some (t) -> t
-        esac;
-
       if log then printf ("Applying memoized parser to %s\n", s.string) fi;
       case findHashTab (deref (t), s) of
           None  ->
