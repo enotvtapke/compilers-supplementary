@@ -18,9 +18,16 @@ public fun logOn () {
 }
 
 public fun initOstap () {
+  printf ("Updated Ostap\n");
   tab    := ref (emptyHashTab (1024, hash, compare));
   restab := emptyCustomMemo (fun (x) {case x of #str -> true | _ -> false esac}, compare);
   hct    := emptyMemo ()
+}
+
+fun getMatcherId(matcher) {
+  case matcher of
+    [_, _, _, _, getLine, getCol] -> (getLine(matcher) * 10000 + getCol(matcher))
+  esac
 }
 
 public fun memo (f) {
@@ -30,7 +37,9 @@ public fun memo (f) {
 
   case findHashTab (deref (tab), f) of
       None      -> if log then printf ("new table...\n") fi;
-      tab ::= addHashTab (deref (tab), f, ref (emptyMap (compare)))
+      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (4096, getMatcherId, fun (r1, r2) {
+        compare(getMatcherId(r1), getMatcherId(r2))
+      })))
 
     | Some (tt) -> skip
   esac;
@@ -43,33 +52,34 @@ public fun memo (f) {
         esac;
 
       if log then printf ("Applying memoized parser to %s\n", s.string) fi;
-      case findMap (deref (t), s) of
+      case findHashTab (deref (t), s) of
           None  ->
+            var tmp;
             if log then printf ("New stream item\n") fi;
-            t ::= addMap (deref (t), s, [addSet (emptySet (compare), k), emptySet (fun (r1, r2) {
+            t ::= addHashTab (deref (t), s, [addSet (emptySet (compare), k), emptySet (fun (r1, r2) {
               case [r1, r2] of
                   [Fail (_, _, _), Fail (_, _, _)] -> 0
                 | _                                -> compare (r1, r2)
               esac
             })]);
-            f (fun (r) {
+            tmp := f (fun (r) {
             --r := lookupMemo (restab, r);
 
               if log then printf ("Running continuation with result %s\n", r.string) fi;
-              case findMap (deref (t), s) of
+              case findHashTab (deref (t), s) of
                 Some ([ks, rs]) ->
                   if memSet (rs, r)
                     then skip
                     else
-                      t ::= addMap (deref (t), s, [ks, addSet (rs, r)]);
+                      t ::= addHashTab (deref (t), s, [ks, addSet (rs, r)]);
                       iterSet (fun (k) {k (r)}, ks)
                   fi
               esac
             }
-            )
-              (s)
+            );
+            tmp(s)
         | Some ([ks, rs]) ->
-            t ::= addMap (deref (t), s, [addSet (ks, k), rs]);
+            t ::= addHashTab (deref (t), s, [addSet (ks, k), rs]);
             iterSet (k, rs)
       esac
     }
@@ -339,4 +349,5 @@ public fun expr (ops, opnd) {
   inner (ops) (id)
 }
 
+-- logOn ();
 initOstap ()

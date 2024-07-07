@@ -1,0 +1,22 @@
+import Matcher;
+import Fun;
+import Ostap;
+
+-- var string = "s";
+
+fun myParse(s1) {
+  var p = "p";
+  memo $ fun (k) {fun (s) {k $ matchString (s, s1)}}
+}
+
+logOn();
+myParse("s");
+myParse("s")
+
+-- public fun token (x) {
+-- -- printf ("token: %s\n", x.string);
+--   case x of
+--       #str -> memo $ fun (k) {fun (s) {k $ matchString (s, x)}}
+--     | _    -> memo $ fun (k) {fun (s) {k $ matchRegexp (s, x)}}
+--   esac
+-- }
