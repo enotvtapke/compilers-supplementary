@@ -18,7 +18,6 @@ public fun logOn () {
 }
 
 public fun initOstap () {
-  printf ("Updated Ostap\n");
   tab    := ref (emptyHashTab (1024, hash, compare));
   restab := emptyCustomMemo (fun (x) {case x of #str -> true | _ -> false esac}, compare);
   hct    := emptyMemo ()
@@ -37,7 +36,7 @@ public fun memo (f) {
 
   case findHashTab (deref (tab), f) of
       None      -> if log then printf ("new table...\n") fi;
-      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (4096, getMatcherId, fun (r1, r2) {
+      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getMatcherId, fun (r1, r2) {
         compare(getMatcherId(r1), getMatcherId(r2))
       })))
 

@@ -13,4 +13,5 @@ Optimizations TODO:
     * Done: 5.045601 s -> 4.793541 s
 * ~~Optimize matchers comparison in Ostap~~
     * Done: 19.132693 s -> 9.771348 s
-* Decrease the number of Fail results?
+* ~~Decrease the number of Fail results~~
+    * Done: no effect on performance (branch: ostap-optimization-no-fail-results) 
