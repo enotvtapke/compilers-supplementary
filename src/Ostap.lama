@@ -11,7 +11,7 @@ import Fun;
 import Matcher;
 import Data;
 
-var tab, hct, restab, log = false;
+var tab, errTab, hct, restab, log = false;
 
 public fun logOn () {
   log := true
@@ -19,8 +19,17 @@ public fun logOn () {
 
 public fun initOstap () {
   tab    := ref (emptyHashTab (1024, hash, compare));
+  errTab := ref (emptyHashTab (1024, hash, compare));
   restab := emptyCustomMemo (fun (x) {case x of #str -> true | _ -> false esac}, compare);
   hct    := emptyMemo ()
+}
+
+fun isBigger(newRes, oldRes) {
+  if oldRes == {} then true elif newRes == {} then false else
+    case [newRes, oldRes] of
+      [Fail(_, l1, c1), Fail(_, l2, c2)] -> if compare(l1 * 10000 + c1, l2 * 10000 + c2) > 0 then true else false fi
+    esac
+  fi
 }
 
 public fun memo (f) {
@@ -32,8 +41,8 @@ public fun memo (f) {
       None      -> if log then printf ("new table...\n") fi;
       tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getPos, fun (r1, r2) {
         compare(getPos(r1), getPos(r2))
-      })))
-
+      })));
+      errTab ::= addHashTab (deref (errTab), f, {})
     | Some (tt) -> skip
   esac;
   t :=
@@ -48,28 +57,34 @@ public fun memo (f) {
           None  ->
             var tmp;
             if log then printf ("New stream item\n") fi;
-            t ::= addHashTab (deref (t), s, [{k}, {}]);
+            t ::= addHashTab (deref (t), s, [{k}, {}, {}]);
             tmp := f (fun (r) {
             --r := lookupMemo (restab, r);
 
               if log then printf ("Running continuation with result %s\n", r.string) fi;
               case findHashTab (deref (t), s) of
-                Some ([ks, rs]) ->
+                Some ([ks, rs, failRes]) ->
                   case r of
-                      Fail (_, _, _) -> skip
+                      Fail (_, _, _) ->
+                        if isBigger(r, failRes) then
+                          t ::= removeHashTab(deref(t), s);
+                          t ::= addHashTab(deref(t), s, [ks, rs, r]);
+                          iter(fun (k) { k(r) }, ks)
+                        fi
                     | _              ->
-                      t ::= removeHashTab(deref(t), s);
-                      t ::= addHashTab(deref(t), s, [ks, r:rs]);
-                      iter(fun (k) { k(r) }, ks)
+                        t ::= removeHashTab(deref(t), s);
+                        t ::= addHashTab(deref(t), s, [ks, r:rs, failRes]);
+                        iter(fun (k) { k(r) }, ks)
                   esac
               esac
             }
             );
             tmp(s)
-        | Some ([ks, rs]) ->
+        | Some ([ks, rs, failRes]) ->
             t ::= removeHashTab(deref(t), s);
-            t ::= addHashTab (deref (t), s, [k:ks, rs]);
-            iter (k, rs)
+            t ::= addHashTab (deref (t), s, [k:ks, rs, failRes]);
+            iter (k, rs);
+            if failRes != {} then k(failRes) fi
       esac
     }
   }
