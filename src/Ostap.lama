@@ -27,7 +27,7 @@ public fun initOstap () {
 fun isBigger(newRes, oldRes) {
   if oldRes == {} then true elif newRes == {} then false else
     case [newRes, oldRes] of
-      [Fail(_, l1, c1), Fail(_, l2, c2)] -> if compare(l1 * 10000 + c1, l2 * 10000 + c2) > 0 then true else false fi
+      [Fail(_, l1, c1), Fail(_, l2, c2)] -> if compare([l1, c1], [l2, c2]) > 0 then true else false fi
     esac
   fi
 }
@@ -241,10 +241,9 @@ fun createResult () {
       | Fail (err, l, c) ->
           if deref (hasError)
             then
-              var c = compare ([line, col], [l, c]);
-
-              if   c == 0 then errors ::= err : deref (errors)
-                elif c <  0 then errors ::= {err}; line ::= l; col ::= c
+              var cmp = compare ([deref(line), deref(col)], [l, c]);
+              if   cmp == 0 then errors ::= err : deref (errors)
+                elif cmp <  0 then errors ::= {err}; line ::= l; col ::= c
               fi
             else
               hasError ::= true;
