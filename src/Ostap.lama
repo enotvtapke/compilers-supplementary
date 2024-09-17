@@ -39,9 +39,7 @@ public fun memo (f) {
 
   case findHashTab (deref (tab), f) of
       None      -> if log then printf ("new table...\n") fi;
-      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getPos, fun (r1, r2) {
-        compare(getPos(r1), getPos(r2))
-      })));
+      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getPos, compare)));
       errTab ::= addHashTab (deref (errTab), f, {})
     | Some (tt) -> skip
   esac;
