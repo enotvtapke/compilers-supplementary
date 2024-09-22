@@ -19,7 +19,6 @@ public fun logOn () {
 
 public fun initOstap () {
   tab    := ref (emptyHashTab (1024, hash, compare));
-  errTab := ref (emptyHashTab (1024, hash, compare));
   restab := emptyCustomMemo (fun (x) {case x of #str -> true | _ -> false esac}, compare);
   hct    := emptyMemo ()
 }
@@ -39,8 +38,7 @@ public fun memo (f) {
 
   case findHashTab (deref (tab), f) of
       None      -> if log then printf ("new table...\n") fi;
-      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (65536, getPos, compare)));
-      errTab ::= addHashTab (deref (errTab), f, {})
+      tab ::= addHashTab (deref (tab), f, ref (emptyHashTab (2048, getPos, compare)))
     | Some (tt) -> skip
   esac;
   t :=
@@ -113,7 +111,7 @@ public fun empty (k) {
 }
 
 public fun alt (a, b) {
-  fun (k) {
+  memo $ fun (k) {
     fun (s) {
       if log then printf ("Running alt at %s\n", s.string) fi;
       a (k) (s);
