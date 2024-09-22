@@ -156,8 +156,7 @@ fun eval (env, w, insns) {
         | BEGIN (_, a, l) -> case makeState(a, l) of s ->
           case take(st, a) of
             [st, args] ->
-              args := listArray(args);
-              iteriArray(fun (i, arg) { assign(s, Arg(i), arg) }, args);
+              iteriArray(fun (i, arg) { assign(s, Arg(i), arg) }, listArray(args));
               eval([st, cst, s, w], insns)
           esac
         esac

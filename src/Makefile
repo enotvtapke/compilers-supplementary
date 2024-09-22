@@ -2,16 +2,14 @@ SHELL := /bin/bash
 
 FILES=$(wildcard *.lama)
 ALL=$(sort $(FILES:.lama=.o))
-LAMAC=lamac
+#LAMAC=lamac
+LAMAC=LAMA=/home/enotvtapke/thesis/compiler-2020-private/runtime /home/enotvtapke/thesis/compiler-2020-private/src/lama-impl
+
 
 .PHONY: all clean
 
-all: Parser.o Lexer.o Ostap.o
-	$(LAMAC) -I . -o lama-impl Driver.lama
-
-Ostap.o: Matcher.o
-
-Lexer.o: Ostap.o
+all: Parser.o Lexer.o X86.o SM.o Manifest.o
+	$(LAMAC) -I . -I /home/enotvtapke/thesis/compiler-2020-private/stdlib -o lama-impl Driver.lama
 
 Parser.o: Lexer.o
 
@@ -26,7 +24,7 @@ SM.o: State.o World.o Expr.o Parser.o Lexer.o Builtins.o
 X86.o: SM.o Manifest.o
 
 %.o: %.lama
-	$(LAMAC) -I . -c $<
+	$(LAMAC) -I . -I /home/enotvtapke/thesis/compiler-2020-private/stdlib -c $<
 
 variate:
 	for f in $(FILES) ; do cp $$f $$f~ ; cat $$f~ | awk 'BEGIN {skip=0; show=1} $$0 ~ /End \*\)/ {show=1; skip=1} $$0 ~ /\(\* Assignment/ {show=1; skip=1} $$0 ~ /\(\* Implementation/ {show=0; skip=1} {if (! skip && show) print $$0; skip = 0}' > $$f ; done

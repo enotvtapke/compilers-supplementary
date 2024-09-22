@@ -53,7 +53,7 @@ fun inparens(p) {
 
 -- A helper function to be used with super-combinator "expr"
 fun binop (op) {
-  [syntax (pos -s[op]), fun (l, loc, r) {
+  [syntax (-s[op]), fun (l, loc, r) {
                           fun (a) {
                             assertValue (a, Binop (op, l (Val), r (Val)), loc)
                           }
@@ -226,4 +226,4 @@ var ifStmt_ = memo $ eta syntax (
 );
 
 -- Public top-level parser
-public parse = syntax (s=scopeExpr { s(Void) });
+public var parse = syntax (s=scopeExpr { s(Void) });
